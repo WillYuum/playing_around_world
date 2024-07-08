@@ -1,16 +1,24 @@
 use bevy:: prelude::*;
 
 pub mod camera_behavior;
+pub mod enemy_behavior;
 
 fn main() {
 
     let camera_state = camera_behavior::controls::CameraState{..Default::default()};
+    let spawner_data = enemy_behavior::enemy_spawner::SpawnData{
+        spawn_enemy_rate: 2.0,
+        time_till_next_spawn: 2.0,
+    };
 
     App::new()
     .add_plugins(DefaultPlugins)
     .add_systems(Startup, setup)
     .add_systems(Update, camera_behavior::controls::rotate_camera)
+    .add_systems(Update, enemy_behavior::enemy_attack::handle_enemy_attack)
+    .add_systems(Update, enemy_behavior::enemy_spawner::handle_spawn_enemy)
     .insert_resource(camera_state)
+    .insert_resource(spawner_data)
     .run();
 }
 

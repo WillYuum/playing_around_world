@@ -1,4 +1,4 @@
-use bevy::{ input::{keyboard::Key, mouse::{MouseButtonInput, MouseMotion}}, prelude::*};
+use bevy::{ input::{keyboard::Key, mouse::{MouseButtonInput, MouseMotion}}, math::VectorSpace, prelude::*};
 
 
 
@@ -26,8 +26,7 @@ pub fn rotate_camera(
     mut camera_state: ResMut<CameraState>,
     mut query: Query<&mut Transform, With<Camera>>
 ){
-    let rotation_speed: f32 = std::f32::consts::PI / 2.0; // Rotate 90 degrees per second
-
+    let rotation_speed: f32 = 0.2;
 
     if mouse_buttons.just_pressed(MouseButton::Left) {
         camera_state.rotating = true;
@@ -41,17 +40,17 @@ pub fn rotate_camera(
     if(camera_state.rotating){
         println!("Left Mouse Being Pressed.");
         for mouse_motion in evr_motion.read() {
-        for mut transform in query.iter_mut() {
-                let delta = mouse_motion.delta - camera_state.last_cursor_position;
-                println!("Updating Transform...");
-                transform.rotate_around(
-                    Vec3::ZERO,
-                    Quat::from_rotation_y(-delta.x * rotation_speed * time.delta_seconds()),
-                );
-            }
-            camera_state.last_cursor_position = mouse_motion.delta;
-        };
-    }
+
+            for mut transform in query.iter_mut() {
+                    let mouseMotionDelta = mouse_motion.delta.x;
+                    println!("Updating Transform...");
+                    transform.rotate_around(
+                        Vec3::ZERO,
+                        Quat::from_rotation_y(-mouseMotionDelta * rotation_speed * time.delta_seconds()),
+                    );
+                };
+        }
+    }   
 }
 
 

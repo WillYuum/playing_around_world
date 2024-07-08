@@ -1,12 +1,16 @@
-use bevy::{ prelude::*};
+use bevy:: prelude::*;
 
+pub mod camera_behavior;
 
 fn main() {
-    println!("Hello, world!");
+
+    let camera_state = camera_behavior::controls::CameraState{..Default::default()};
+
     App::new()
     .add_plugins(DefaultPlugins)
     .add_systems(Startup, setup)
-    .add_systems(Update, camera_rotation)
+    .add_systems(Update, camera_behavior::controls::rotate_camera)
+    .insert_resource(camera_state)
     .run();
 }
 
@@ -54,20 +58,4 @@ fn setup(
             ..default()
         });
     
-}
-
-
-fn camera_rotation(time: Res<Time>,
-     keyboard_input:Res<ButtonInput<KeyCode>>,
-    mut query: Query<&mut Transform, With<Camera>>
-){
-    let rotation_speed = std::f32::consts::PI / 2.0; // Rotate 90 degrees per second
-    for mut transform in query.iter_mut() {
-        if keyboard_input.pressed(KeyCode::KeyQ) {
-            transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(rotation_speed * time.delta_seconds()));
-        }
-        if keyboard_input.pressed(KeyCode::KeyE) {
-            transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(-rotation_speed * time.delta_seconds()));
-        }
-    }
 }

@@ -1,3 +1,5 @@
+use bevy::prelude::*;
+
 #[derive(Resource)]
 pub struct CameraState {
     pub rotating: bool,

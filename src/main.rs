@@ -44,6 +44,7 @@ fn main() {
         .add_systems(Update, systems::movement::enemy_movement_system)
         .add_systems(Update, systems::disposal::enemy_disposal_system)
         .add_systems(Update, systems::animation::enemy_animation_system)
+        .add_systems(Update, systems::debug::draw_axes)
         .insert_resource(camera_state)
         .run();
 }
@@ -78,7 +79,7 @@ fn setup(
     });
 
 
-
+    
     //Circular Plane
     commands.spawn(PbrBundle {
         mesh: meshes.add(Circle::new(4.0)),
@@ -94,6 +95,9 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
+    // .insert(ShowAxes);
+
+    
 
     // light
     commands.spawn(PointLightBundle {

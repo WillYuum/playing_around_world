@@ -1,8 +1,10 @@
 use std::time::Duration;
 
+use crate::components::debug::ShowAxes;
 use crate::components::enemy::{Enemy, Position};
 use crate::resources::{config::Config, game_state::GameState};
 use bevy::prelude::*;
+use bevy::render::primitives::Aabb;
 use rand::prelude::*;
 
 pub fn enemy_spawning_system(
@@ -36,6 +38,9 @@ pub fn enemy_spawning_system(
                 })
                 .insert(Enemy)
                 .insert(Position { x, y: 2.0, z });
+                .insert(Position { x, y: 2.0, z })
+                .insert(ShowAxes)
+                .insert(Aabb::from_min_max(Vec3::new(-1.0, -1.0, -1.0), Vec3::new(1.0, 1.0, 1.0)));
                 // .insert(animation_handle);
 
             game_state.enemy_count += 1;

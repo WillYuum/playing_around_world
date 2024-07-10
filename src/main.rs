@@ -1,6 +1,11 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{
+    animation::{animate_targets, RepeatAnimation},
+    prelude::*,
+};
+use resources::animations::Animations;
+
 
 pub mod components;
 pub mod resources;
@@ -20,6 +25,11 @@ fn main() {
         spawn_cooldown: 5.0,
     };
 
+    
+
+
+    
+
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
@@ -28,19 +38,47 @@ fn main() {
         .insert_resource(game_state)
         .insert_resource(config)
         .add_systems(Startup, setup)
+        .add_systems(Update, systems::animation::setup_enemy_animations.before(animate_targets))
         .add_systems(Update, systems::camera_system::rotate_camera)
         .add_systems(Update, systems::spawning::enemy_spawning_system)
         .add_systems(Update, systems::movement::enemy_movement_system)
         .add_systems(Update, systems::disposal::enemy_disposal_system)
+        .add_systems(Update, systems::animation::enemy_animation_system)
         .insert_resource(camera_state)
         .run();
 }
 
 fn setup(
+    asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut graphs: ResMut<Assets<AnimationGraph>>,
 ) {
+
+    // Build the animation graph
+    let mut graph = AnimationGraph::new();
+    let animations = graph
+        .add_clips(
+            [
+                GltfAssetLabel::Animation(0).from_asset("models/low_poly_naruto/scene.gltf#Scene0"),
+            ]
+            .into_iter()
+            .map(|path| asset_server.load(path)),
+            1.0,
+            graph.root,
+        )
+        .collect();
+
+    // Insert a resource with the current scene information
+    let graph = graphs.add(graph);
+    commands.insert_resource(Animations {
+        animations,
+        graph: graph.clone(),
+    });
+
+
+
     //Circular Plane
     commands.spawn(PbrBundle {
         mesh: meshes.add(Circle::new(4.0)),

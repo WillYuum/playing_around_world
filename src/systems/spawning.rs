@@ -10,6 +10,7 @@ pub fn enemy_spawning_system(
     time: Res<Time>,
     config: Res<Config>,
     mut game_state: ResMut<GameState>,
+    asset_server: Res<AssetServer>,
     mut timer: Local<Timer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -25,15 +26,17 @@ pub fn enemy_spawning_system(
 
             println!("Spawned enemy on {}, {}", x, z);
 
+            let scene_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
+            // let animation_handle: Handle<AnimationClip> = asset_server.load("models/low_poly_naruto/scene.gltf#Animation0");
             commands
-                .spawn(PbrBundle {
-                    mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-                    material: materials.add(Color::srgb_u8(250, 55, 10)),
-                    transform: Transform::from_xyz(x, 1.5, z),
+                .spawn(SceneBundle {
+                    scene: scene_handle.clone(),
+                    transform: Transform::from_xyz(x, 1.5, z).with_scale(Vec3::new(0.4, 0.4, 0.4)),
                     ..default()
                 })
                 .insert(Enemy)
                 .insert(Position { x, y: 2.0, z });
+                // .insert(animation_handle);
 
             game_state.enemy_count += 1;
         } else {

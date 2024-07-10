@@ -4,7 +4,7 @@ use bevy::{
     animation::{animate_targets, RepeatAnimation},
     prelude::*,
 };
-use resources::animations::Animations;
+use resources::{animations::Animations, game_state::GameState};
 
 
 pub mod components;
@@ -37,6 +37,7 @@ fn main() {
         }))
         .insert_resource(game_state)
         .insert_resource(config)
+        .insert_resource(camera_state)
         .add_systems(Startup, setup)
         .add_systems(Update, systems::animation::setup_enemy_animations.before(animate_targets))
         .add_systems(Update, systems::camera_system::rotate_camera)
@@ -44,8 +45,8 @@ fn main() {
         .add_systems(Update, systems::movement::enemy_movement_system)
         .add_systems(Update, systems::disposal::enemy_disposal_system)
         .add_systems(Update, systems::animation::enemy_animation_system)
+        .add_systems(Update, systems::ui_system::ui_system)
         .add_systems(Update, systems::debug::draw_axes)
-        .insert_resource(camera_state)
         .run();
 }
 
@@ -115,4 +116,28 @@ fn setup(
         transform: Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
+
+      // UI setup
+    //   commands.spawn(Camera2dBundle::default());
+      commands.spawn((
+        TextBundle::from_section(
+            // Accepts a `String` or any type that converts into a `String`, such as `&str`
+            "hello\nbevy!",
+            TextStyle {
+                // font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 25.0,
+                ..default()
+            },
+        ) // Set the justification of the Text
+        .with_text_justify(JustifyText::Center)
+        // Set the style of the TextBundle itself.
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(5.0),
+            right: Val::Px(5.0),
+            ..default()
+        }),
+        components::ui_components::EnemyCount,
+    ));
+
 }

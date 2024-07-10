@@ -1,13 +1,9 @@
 use std::time::Duration;
-
-use crate::components::debug::ShowAxes;
 use crate::components::enemy::{Enemy, Position};
 use crate::resources::{config::Config, game_state::GameState};
 use bevy::prelude::*;
 use bevy::render::primitives::Aabb;
 use rand::prelude::*;
-
-use super::utils::rotation_towards_target;
 
 pub fn enemy_spawning_system(
     mut commands: Commands,
@@ -16,43 +12,58 @@ pub fn enemy_spawning_system(
     mut game_state: ResMut<GameState>,
     asset_server: Res<AssetServer>,
     mut timer: Local<Timer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     timer.tick(time.delta());
-    // println!("timer ticked {:#?}", timer.duration());
 
     if timer.finished() {
         if game_state.enemy_count < config.max_enemies {
             let mut rng = thread_rng();
-            let x: f32 = rng.gen_range(20.0..50.0);
-            let z: f32 = rng.gen_range(20.0..50.0);
-
-            println!("Spawned enemy on {}, {}", x, z);
-
-            let scene_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
             
+            // Constants
+            let min_boid_spawn_point_radius = 10.0;
+            let max_boid_spawn_point_radius = 50.0; 
+            let enemy_dist_from_boid_spawn_point = 10.0;
+            let num_enemies_per_spawn_point = 5;
             
-            let enemy_transform = 
-                        Transform::from_xyz(x, 1.5, z)
-                        .with_scale(Vec3::new(0.4, 0.4, 0.4))
-                        .with_rotation(rotation_towards_target(Vec3::new(x, 0.0, z), Vec3::ZERO));
+            let boid_spawn_point_radius = rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
+            let spawn_point_x = rng.gen_range(-boid_spawn_point_radius..boid_spawn_point_radius);
+            let spawn_point_z = rng.gen_range(-boid_spawn_point_radius..boid_spawn_point_radius);
+            
+            let spawn_point = Vec3::new(
+                if rng.gen::<bool>() { spawn_point_x } else { -spawn_point_x },
+                0.0, // Adjust as needed for height of spawning
+                if rng.gen::<bool>() { spawn_point_z } else { -spawn_point_z },
+            );
 
-            // let animation_handle: Handle<AnimationClip> = asset_server.load("models/low_poly_naruto/scene.gltf#Animation0");
-            commands
-                .spawn(SceneBundle {
+            for _ in 0..num_enemies_per_spawn_point {
+                let enemy_offset = Vec3::new(
+                    rng.gen_range(-enemy_dist_from_boid_spawn_point..enemy_dist_from_boid_spawn_point),
+                    0.0, // Adjust as needed for height offset
+                    rng.gen_range(-enemy_dist_from_boid_spawn_point..enemy_dist_from_boid_spawn_point),
+                );
+
+                let enemy_position = spawn_point + enemy_offset;
+
+                let scene_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
+                let enemy_transform = Transform::from_translation(enemy_position)
+                    .with_scale(Vec3::splat(0.4))
+                    .with_rotation(Quat::IDENTITY);
+                
+                commands.spawn(SceneBundle {
                     scene: scene_handle.clone(),
                     transform: enemy_transform,
-                    ..default()
-                },
-                )
+                    ..Default::default()
+                })
                 .insert(Enemy)
-                .insert(Position { x, y: 2.0, z })
-                .insert(ShowAxes)
+                .insert(Position {
+                    x: enemy_position.x,
+                    y: enemy_position.y,
+                    z: enemy_position.z,
+                })
                 .insert(Aabb::from_min_max(Vec3::new(-1.0, -1.0, -1.0), Vec3::new(1.0, 1.0, 1.0)));
-                // .insert(animation_handle);
 
-            game_state.enemy_count += 1;
+                game_state.enemy_count += 1;
+            }
         } else {
             game_state.cooldown_timer.reset();
         }

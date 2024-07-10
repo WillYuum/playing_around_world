@@ -95,9 +95,6 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
-    // .insert(ShowAxes);
-
-    
 
     // light
     commands.spawn(PointLightBundle {

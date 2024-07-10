@@ -7,6 +7,8 @@ use bevy::prelude::*;
 use bevy::render::primitives::Aabb;
 use rand::prelude::*;
 
+use super::utils::rotation_towards_target;
+
 pub fn enemy_spawning_system(
     mut commands: Commands,
     time: Res<Time>,
@@ -29,15 +31,22 @@ pub fn enemy_spawning_system(
             println!("Spawned enemy on {}, {}", x, z);
 
             let scene_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
+            
+            
+            let enemy_transform = 
+                        Transform::from_xyz(x, 1.5, z)
+                        .with_scale(Vec3::new(0.4, 0.4, 0.4))
+                        .with_rotation(rotation_towards_target(Vec3::new(x, 0.0, z), Vec3::ZERO));
+
             // let animation_handle: Handle<AnimationClip> = asset_server.load("models/low_poly_naruto/scene.gltf#Animation0");
             commands
                 .spawn(SceneBundle {
                     scene: scene_handle.clone(),
-                    transform: Transform::from_xyz(x, 1.5, z).with_scale(Vec3::new(0.4, 0.4, 0.4)),
+                    transform: enemy_transform,
                     ..default()
-                })
+                },
+                )
                 .insert(Enemy)
-                .insert(Position { x, y: 2.0, z });
                 .insert(Position { x, y: 2.0, z })
                 .insert(ShowAxes)
                 .insert(Aabb::from_min_max(Vec3::new(-1.0, -1.0, -1.0), Vec3::new(1.0, 1.0, 1.0)));

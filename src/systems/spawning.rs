@@ -12,6 +12,7 @@ pub fn enemy_spawning_system(
     mut game_state: ResMut<GameState>,
     asset_server: Res<AssetServer>,
     mut timer: Local<Timer>,
+    naruto_resource: Res<NarutoResource>,
 ) {
     timer.tick(time.delta());
 
@@ -50,7 +51,7 @@ pub fn enemy_spawning_system(
                     .with_rotation(Quat::IDENTITY);
                 
                 commands.spawn(SceneBundle {
-                    scene: scene_handle.clone(),
+                    scene: naruto_resource.model.clone(),
                     transform: enemy_transform,
                     ..Default::default()
                 })

@@ -4,7 +4,7 @@ use bevy::{
     animation::{animate_targets, RepeatAnimation},
     prelude::*,
 };
-use resources::{animations::Animations, game_state::GameState};
+use resources::{animations::Animations, asset_resources::NarutoResource, game_state::GameState};
 
 
 pub mod components;
@@ -57,6 +57,13 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut graphs: ResMut<Assets<AnimationGraph>>,
 ) {
+
+        
+    let naruto_model_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
+    commands.insert_resource(NarutoResource {
+        model: naruto_model_handle,
+    });
+    
 
     // Build the animation graph
     let mut graph = AnimationGraph::new();

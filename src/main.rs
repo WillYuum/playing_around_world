@@ -20,15 +20,11 @@ fn main() {
         cooldown_timer: Timer::from_seconds(10.5, TimerMode::Repeating),
     };
     let config = resources::config::Config {
-        enemy_spawn_rate: 0.5,
-        max_enemies: 100,
+        enemy_spawn_rate: 0.1,
+        max_enemies: 1000,
         spawn_cooldown: 5.0,
     };
 
-    
-
-
-    
 
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin {

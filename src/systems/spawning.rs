@@ -1,5 +1,6 @@
 use std::time::Duration;
 use crate::components::enemy::{Enemy, Position};
+use crate::resources::asset_resources::NarutoResource;
 use crate::resources::{config::Config, game_state::GameState};
 use bevy::prelude::*;
 use bevy::render::primitives::Aabb;
@@ -21,10 +22,10 @@ pub fn enemy_spawning_system(
             let mut rng = thread_rng();
             
             // Constants
-            let min_boid_spawn_point_radius = 10.0;
-            let max_boid_spawn_point_radius = 50.0; 
+            let min_boid_spawn_point_radius = 50.0;
+            let max_boid_spawn_point_radius = 80.0; 
             let enemy_dist_from_boid_spawn_point = 10.0;
-            let num_enemies_per_spawn_point = 5;
+            let num_enemies_per_spawn_point = rng.gen_range(5..25);
             
             let boid_spawn_point_radius = rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
             let spawn_point_x = rng.gen_range(-boid_spawn_point_radius..boid_spawn_point_radius);
@@ -45,7 +46,6 @@ pub fn enemy_spawning_system(
 
                 let enemy_position = spawn_point + enemy_offset;
 
-                let scene_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
                 let enemy_transform = Transform::from_translation(enemy_position)
                     .with_scale(Vec3::splat(0.4))
                     .with_rotation(Quat::IDENTITY);
@@ -69,7 +69,7 @@ pub fn enemy_spawning_system(
             game_state.cooldown_timer.reset();
         }
 
-        timer.set_duration(Duration::new(1, 0));
+        timer.set_duration(Duration::from_millis(100));
         timer.reset();
     }
 }

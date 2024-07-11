@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 use std::time::Duration;
 use crate::components::enemy::{Enemy, Position};
 use crate::resources::asset_resources::NarutoResource;
@@ -11,7 +12,6 @@ pub fn enemy_spawning_system(
     time: Res<Time>,
     config: Res<Config>,
     mut game_state: ResMut<GameState>,
-    asset_server: Res<AssetServer>,
     mut timer: Local<Timer>,
     naruto_resource: Res<NarutoResource>,
 ) {
@@ -25,16 +25,16 @@ pub fn enemy_spawning_system(
             let min_boid_spawn_point_radius = 50.0;
             let max_boid_spawn_point_radius = 80.0; 
             let enemy_dist_from_boid_spawn_point = 10.0;
-            let num_enemies_per_spawn_point = rng.gen_range(5..25);
+            let num_enemies_per_spawn_point = rng.gen_range(2..3);
             
-            let boid_spawn_point_radius = rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
-            let spawn_point_x = rng.gen_range(-boid_spawn_point_radius..boid_spawn_point_radius);
-            let spawn_point_z = rng.gen_range(-boid_spawn_point_radius..boid_spawn_point_radius);
+            let spawn_point_x = rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
+            let spawn_point_z =  rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
+            let angle = rng.gen_range(0.0..PI * 2.0);
             
             let spawn_point = Vec3::new(
-                if rng.gen::<bool>() { spawn_point_x } else { -spawn_point_x },
-                0.0, // Adjust as needed for height of spawning
-                if rng.gen::<bool>() { spawn_point_z } else { -spawn_point_z },
+                angle.cos() * spawn_point_x,
+                0.0,
+                angle.sin() * spawn_point_z,
             );
 
             for _ in 0..num_enemies_per_spawn_point {

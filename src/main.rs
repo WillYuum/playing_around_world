@@ -1,8 +1,7 @@
-use std::time::Duration;
-
 use bevy::{
     animation::{animate_targets, RepeatAnimation},
-    prelude::*,
+    asset::AssetMetaCheck,
+    prelude::*
 };
 use resources::{animations::Animations, asset_resources::NarutoResource, game_state::GameState};
 
@@ -29,6 +28,11 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
+
+            // Wasm builds will check for meta files (that don't exist) if this isn't set.
+            // This causes errors and even panics in web builds on itch.
+            // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
+            meta_check: AssetMetaCheck::Never,
             ..Default::default()
         }))
         .insert_resource(game_state)

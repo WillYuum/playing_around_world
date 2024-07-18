@@ -11,7 +11,14 @@ pub mod systems;
 
 fn main() {
 
-    use systems::camera_system::{rotate_camera, zoom_camera};
+    use systems::{
+        animation::{enemy_animation_system, setup_enemy_animations},
+        camera_system::{rotate_camera, zoom_camera},
+        spawning::enemy_spawning_system,
+        movement::enemy_movement_system,
+        disposal::enemy_disposal_system,
+        ui_system::ui_system,
+    };
 
     let camera_state = resources::camera_state::CameraState {
         ..Default::default()
@@ -42,13 +49,13 @@ fn main() {
         .insert_resource(config)
         .insert_resource(camera_state)
         .add_systems(Startup, setup)
-        .add_systems(Update, systems::animation::setup_enemy_animations.before(animate_targets))
+        .add_systems(Update, setup_enemy_animations.before(animate_targets))
         .add_systems(Update, (rotate_camera, zoom_camera))
-        .add_systems(Update, systems::spawning::enemy_spawning_system)
-        .add_systems(Update, systems::movement::enemy_movement_system)
-        .add_systems(Update, systems::disposal::enemy_disposal_system)
-        .add_systems(Update, systems::animation::enemy_animation_system)
-        .add_systems(Update, systems::ui_system::ui_system)
+        .add_systems(Update, enemy_spawning_system)
+        .add_systems(Update, enemy_movement_system)
+        .add_systems(Update, enemy_disposal_system)
+        .add_systems(Update, enemy_animation_system)
+        .add_systems(Update, ui_system)
         .add_systems(Update, systems::debug::draw_axes);
 
 

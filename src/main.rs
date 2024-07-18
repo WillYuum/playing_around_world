@@ -1,7 +1,7 @@
 use bevy::{
-    animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*
+    animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*, scene::ron::de
 };
-use resources::{animations::Animations, asset_resources::NarutoResource, game_state::GameState};
+use resources::{animations::Animations, asset_resources::CardAsset, game_state::GameState};
 
 
 pub mod components;
@@ -69,13 +69,31 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut graphs: ResMut<Assets<AnimationGraph>>,
 ) {
-
+    use resources::asset_resources::{
+        // Cards2DResources,
+        CardAsset,
+        CardType,
+        NarutoResource,
+    };
         
     let naruto_model_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
     commands.insert_resource(NarutoResource {
         model: naruto_model_handle,
     });
-    
+
+    let card_files = [
+        ("sprites/cards_2d/PineTools.com_files/red_ace.png", CardType::Ace),
+        ("sprites/cards_2d/PineTools.com_files/red_king.png", CardType::King),
+        ("sprites/cards_2d/PineTools.com_files/red_queen.png", CardType::Queen),
+        ("sprites/cards_2d/PineTools.com_files/red_jack.png", CardType::Jack),
+    ];
+
+    let all_textures: Vec<CardAsset> = card_files.iter().map(|(path, card_type)| {
+        let texture : Handle<Image>  = asset_server.load(*path);
+        CardAsset { texture, card_type: card_type.clone() }
+    })
+    .collect();
+
 
     // Build the animation graph
     let mut graph = AnimationGraph::new();

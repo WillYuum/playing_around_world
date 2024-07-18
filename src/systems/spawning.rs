@@ -25,7 +25,7 @@ pub fn enemy_spawning_system(
             let min_boid_spawn_point_radius = 50.0;
             let max_boid_spawn_point_radius = 80.0; 
             let enemy_dist_from_boid_spawn_point = 10.0;
-            let num_enemies_per_spawn_point = rng.gen_range(2..3);
+            let num_enemies_per_spawn_point = rng.gen_range(10..15);
             
             let spawn_point_x = rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);
             let spawn_point_z =  rng.gen_range(min_boid_spawn_point_radius..max_boid_spawn_point_radius);

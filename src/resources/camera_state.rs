@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct CameraState {
     pub rotating: bool,
     pub last_cursor_position: Vec2,
+    pub distance: f32,
 }
 
 impl Default for CameraState {
@@ -11,6 +12,7 @@ impl Default for CameraState {
         CameraState {
             rotating: false,
             last_cursor_position: Vec2::ZERO,
+            distance: 5.0,
         }
     }
 }

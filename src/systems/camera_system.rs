@@ -1,5 +1,5 @@
 
-use bevy::{ input::{keyboard::Key, mouse::{MouseButtonInput, MouseMotion}}, math::VectorSpace, prelude::*};
+use bevy::{ input::{keyboard::Key, mouse::{MouseButtonInput, MouseMotion, MouseWheel}}, math::VectorSpace, prelude::*};
 
 use crate::resources::camera_state::CameraState;
 
@@ -26,15 +26,38 @@ pub fn rotate_camera(
         for mouse_motion in evr_motion.read() {
 
             for mut transform in query.iter_mut() {
-                    let mouseMotionDelta = mouse_motion.delta.x;
+                    let mouse_motion_delta = mouse_motion.delta.x;
                     println!("Updating Transform...");
                     transform.rotate_around(
                         Vec3::ZERO,
-                        Quat::from_rotation_y(-mouseMotionDelta * rotation_speed * time.delta_seconds()),
+                        Quat::from_rotation_y(-mouse_motion_delta * rotation_speed * time.delta_seconds()),
                     );
                 };
         }
     }   
+}
+
+
+pub fn zoom_camera(
+    mut evr_scroll: EventReader<MouseWheel>,
+    mut camera_state: ResMut<CameraState>,
+    mut query: Query<&mut Transform, With<Camera>>
+){
+    let zoom_speed: f32 = 1.0;
+    let min_distance:f32 = 5.0;
+    let max_distance:f32 = 35.0;
+
+
+    for scroll in evr_scroll.read() {
+        camera_state.distance -= scroll.y * zoom_speed;
+        camera_state.distance = camera_state.distance.clamp(min_distance, max_distance);
+    }
+
+    for mut transform in query.iter_mut() {
+        transform.translation = transform.translation.normalize() * camera_state.distance;
+    }
+
+
 }
 
 

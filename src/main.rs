@@ -1,7 +1,5 @@
 use bevy::{
-    animation::{animate_targets, RepeatAnimation},
-    asset::AssetMetaCheck,
-    prelude::*
+    animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*
 };
 use resources::{animations::Animations, asset_resources::NarutoResource, game_state::GameState};
 
@@ -10,7 +8,11 @@ pub mod components;
 pub mod resources;
 pub mod systems;
 
+
 fn main() {
+
+    use systems::camera_system::{rotate_camera, zoom_camera};
+
     let camera_state = resources::camera_state::CameraState {
         ..Default::default()
     };
@@ -25,8 +27,9 @@ fn main() {
     };
 
 
-    App::new()
-        .add_plugins(DefaultPlugins.set(AssetPlugin {
+    let mut built_app = App::new();
+    
+    built_app.add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
 
             // Wasm builds will check for meta files (that don't exist) if this isn't set.
@@ -40,14 +43,16 @@ fn main() {
         .insert_resource(camera_state)
         .add_systems(Startup, setup)
         .add_systems(Update, systems::animation::setup_enemy_animations.before(animate_targets))
-        .add_systems(Update, systems::camera_system::rotate_camera)
+        .add_systems(Update, (rotate_camera, zoom_camera))
         .add_systems(Update, systems::spawning::enemy_spawning_system)
         .add_systems(Update, systems::movement::enemy_movement_system)
         .add_systems(Update, systems::disposal::enemy_disposal_system)
         .add_systems(Update, systems::animation::enemy_animation_system)
         .add_systems(Update, systems::ui_system::ui_system)
-        .add_systems(Update, systems::debug::draw_axes)
-        .run();
+        .add_systems(Update, systems::debug::draw_axes);
+
+
+    built_app.run();
 }
 
 fn setup(

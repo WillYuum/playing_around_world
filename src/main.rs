@@ -1,8 +1,17 @@
 use bevy::{
-    animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*, scene::ron::de
+    animation::{animate_targets, RepeatAnimation},
+    app::AppLabel, 
+    asset::AssetMetaCheck,
+    log::LogPlugin,
+    prelude::*,
 };
-use resources::{animations::Animations, asset_resources::CardAsset, game_state::GameState};
+use resources::{
+    animations::Animations,
+    asset_resources::CardAsset,
+    game_state::GameState
+};
 
+use bevy_dev_console::prelude::*;
 
 pub mod components;
 pub mod resources;
@@ -36,7 +45,21 @@ fn main() {
 
     let mut built_app = App::new();
     
-    built_app.add_plugins(DefaultPlugins.set(AssetPlugin {
+    built_app
+        // .add_plugins(ConsoleLogPlugin::default())
+        .add_plugins(DefaultPlugins.build().disable::<LogPlugin>())
+        // .add_plugins(DevConsolePlugin)
+        // .add_plugins((
+        //     // Start capturing logs before the default plugins initiate.
+        //     ConsoleLogPlugin::default(),
+        //     // Add the default plugins without the LogPlugin.
+        //     // Not removing the LogPlugin will cause a panic!
+        //     DefaultPlugins.build().disable::<LogPlugin>(),
+        //     // Add the dev console plugin itself.
+        //     // DevConsolePlugin,
+        //     // default()
+        // ))
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
 
             // Wasm builds will check for meta files (that don't exist) if this isn't set.

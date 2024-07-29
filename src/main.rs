@@ -1,8 +1,9 @@
 use bevy::{
     animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*, scene::ron::de
 };
+use components::ui_components;
 use resources::{animations::Animations, asset_resources::CardAsset, game_state::GameState};
-
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 
 pub mod components;
 pub mod resources;
@@ -17,7 +18,7 @@ fn main() {
         spawning::enemy_spawning_system,
         movement::enemy_movement_system,
         disposal::enemy_disposal_system,
-        ui_system::ui_system,
+        ui_system::{ui_system, fps_counter_showhide, fps_text_update_system},
     };
 
     let camera_state = resources::camera_state::CameraState {
@@ -49,6 +50,7 @@ fn main() {
         .insert_resource(config)
         .insert_resource(camera_state)
         .add_systems(Startup, setup)
+        .add_systems(Startup, setup_fps_counter)
         .add_systems(Update, setup_enemy_animations.before(animate_targets))
         .add_systems(Update, (rotate_camera, zoom_camera))
         .add_systems(Update, enemy_spawning_system)
@@ -56,8 +58,11 @@ fn main() {
         .add_systems(Update, enemy_disposal_system)
         .add_systems(Update, enemy_animation_system)
         .add_systems(Update, ui_system)
+        .add_systems(Update, (fps_counter_showhide, fps_text_update_system))
         .add_systems(Update, systems::debug::draw_axes);
 
+
+    built_app.add_plugins(FrameTimeDiagnosticsPlugin::default());
 
     built_app.run();
 }
@@ -177,4 +182,51 @@ fn setup(
         components::ui_components::EnemyCount,
     ));
 
+}
+
+
+
+fn setup_fps_counter(mut commands: Commands){
+    let root = commands.spawn((
+        ui_components::FpsRoot,
+        NodeBundle{
+            background_color: BackgroundColor(Color::BLACK.with_alpha(0.5)),
+            z_index: ZIndex::Global(i32::MAX),
+            style: Style{
+                position_type: PositionType::Absolute,
+                left: Val::Percent(1.0),
+                top: Val::Percent(1.0),
+                bottom: Val::Auto,
+                padding: UiRect::all(Val::Px(4.0)),
+                ..Default::default()
+            },
+            ..Default::default()
+        }     
+    )).id();
+
+    let text_fps = commands.spawn((
+        ui_components::FpsText,
+        TextBundle {
+            text: Text::from_sections([
+                TextSection {
+                    value: "FPS: ".into(),
+                    style: TextStyle {
+                        font_size: 16.0,
+                        color: Color::WHITE,
+                        ..default()
+                    }
+                },
+                TextSection {
+                    value: " N/A".into(),
+                    style: TextStyle {
+                        font_size: 16.0,
+                        color: Color::WHITE,
+                        ..default()
+                    }
+                },
+            ]),
+            ..Default::default()
+        },
+    )).id();
+    commands.entity(root).push_children(&[text_fps]);
 }

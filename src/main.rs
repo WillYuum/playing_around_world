@@ -1,8 +1,10 @@
 use bevy::{
-    animation::{animate_targets, RepeatAnimation}, app::AppLabel, asset::AssetMetaCheck, prelude::*, scene::ron::de
+    prelude::*,
+    animation::{animate_targets, RepeatAnimation},
+    asset::AssetMetaCheck,
 };
 use components::ui_components;
-use resources::{animations::Animations, asset_resources::CardAsset, game_state::GameState};
+use resources::{animations::EnemyAnimations, asset_resources::CardAsset, game_state::GameState};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 
 pub mod components;
@@ -13,7 +15,7 @@ pub mod systems;
 fn main() {
 
     use systems::{
-        animation::{enemy_animation_system, setup_enemy_animations},
+        animation::{ handle_play_enemy_animation_on_spawn},
         camera_system::{rotate_camera, zoom_camera},
         spawning::enemy_spawning_system,
         movement::enemy_movement_system,
@@ -51,18 +53,18 @@ fn main() {
         .insert_resource(camera_state)
         .add_systems(Startup, setup)
         .add_systems(Startup, setup_fps_counter)
-        .add_systems(Update, setup_enemy_animations.before(animate_targets))
         .add_systems(Update, (rotate_camera, zoom_camera))
         .add_systems(Update, enemy_spawning_system)
         .add_systems(Update, enemy_movement_system)
         .add_systems(Update, enemy_disposal_system)
-        .add_systems(Update, enemy_animation_system)
+        .add_systems(Update, handle_play_enemy_animation_on_spawn)
         .add_systems(Update, ui_system)
         .add_systems(Update, (fps_counter_showhide, fps_text_update_system))
         .add_systems(Update, systems::debug::draw_axes);
 
 
     built_app.add_plugins(FrameTimeDiagnosticsPlugin::default());
+
 
     built_app.run();
 }
@@ -116,7 +118,7 @@ fn setup(
 
     // Insert a resource with the current scene information
     let graph = graphs.add(graph);
-    commands.insert_resource(Animations {
+    commands.insert_resource(EnemyAnimations {
         animations,
         graph: graph.clone(),
     });
@@ -198,6 +200,9 @@ fn setup_fps_counter(mut commands: Commands){
                 top: Val::Percent(1.0),
                 bottom: Val::Auto,
                 padding: UiRect::all(Val::Px(4.0)),
+                flex_wrap: FlexWrap::Wrap,
+                max_width: Val::Px(150.0),
+                max_height: Val::Px(200.0),
                 ..Default::default()
             },
             ..Default::default()
@@ -210,6 +215,22 @@ fn setup_fps_counter(mut commands: Commands){
             text: Text::from_sections([
                 TextSection {
                     value: "FPS: ".into(),
+                    style: TextStyle {
+                        font_size: 16.0,
+                        color: Color::WHITE,
+                        ..default()
+                    }
+                },
+                TextSection {
+                    value: " N/A".into(),
+                    style: TextStyle {
+                        font_size: 16.0,
+                        color: Color::WHITE,
+                        ..default()
+                    }
+                },
+                TextSection {
+                    value: " Draw Calls:".into(),
                     style: TextStyle {
                         font_size: 16.0,
                         color: Color::WHITE,

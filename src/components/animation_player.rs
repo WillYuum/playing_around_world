@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct AnimationPlayer {
+pub struct CustomAnimator {
     pub animation: Handle<AnimationClip>,
 }

@@ -1,26 +1,24 @@
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::{
-    prelude::*,
     animation::{animate_targets, RepeatAnimation},
     asset::AssetMetaCheck,
+    prelude::*,
 };
 use components::ui_components;
 use resources::{animations::EnemyAnimations, asset_resources::CardAsset, game_state::GameState};
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 
 pub mod components;
 pub mod resources;
 pub mod systems;
 
-
 fn main() {
-
     use systems::{
-        animation::{ handle_play_enemy_animation_on_spawn},
+        animation::handle_play_enemy_animation_on_spawn,
         camera_system::{rotate_camera, zoom_camera},
-        spawning::enemy_spawning_system,
-        movement::enemy_movement_system,
         disposal::enemy_disposal_system,
-        ui_system::{ui_system, fps_counter_showhide, fps_text_update_system},
+        movement::enemy_movement_system,
+        spawning::enemy_spawning_system,
+        ui_system::{fps_counter_showhide, fps_text_update_system, ui_system},
     };
 
     let camera_state = resources::camera_state::CameraState {
@@ -36,10 +34,10 @@ fn main() {
         spawn_cooldown: 5.0,
     };
 
-
     let mut built_app = App::new();
-    
-    built_app.add_plugins(DefaultPlugins.set(AssetPlugin {
+
+    built_app
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
             watch_for_changes_override: Some(true),
 
             // Wasm builds will check for meta files (that don't exist) if this isn't set.
@@ -62,9 +60,7 @@ fn main() {
         .add_systems(Update, (fps_counter_showhide, fps_text_update_system))
         .add_systems(Update, systems::debug::draw_axes);
 
-
     built_app.add_plugins(FrameTimeDiagnosticsPlugin::default());
-
 
     built_app.run();
 }
@@ -82,35 +78,49 @@ fn setup(
         CardType,
         NarutoResource,
     };
-        
+
     let naruto_model_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
     commands.insert_resource(NarutoResource {
         model: naruto_model_handle,
     });
 
     let card_files = [
-        ("sprites/cards_2d/PineTools.com_files/red_ace.png", CardType::Ace),
-        ("sprites/cards_2d/PineTools.com_files/red_king.png", CardType::King),
-        ("sprites/cards_2d/PineTools.com_files/red_queen.png", CardType::Queen),
-        ("sprites/cards_2d/PineTools.com_files/red_jack.png", CardType::Jack),
+        (
+            "sprites/cards_2d/PineTools.com_files/red_ace.png",
+            CardType::Ace,
+        ),
+        (
+            "sprites/cards_2d/PineTools.com_files/red_king.png",
+            CardType::King,
+        ),
+        (
+            "sprites/cards_2d/PineTools.com_files/red_queen.png",
+            CardType::Queen,
+        ),
+        (
+            "sprites/cards_2d/PineTools.com_files/red_jack.png",
+            CardType::Jack,
+        ),
     ];
 
-    let all_textures: Vec<CardAsset> = card_files.iter().map(|(path, card_type)| {
-        let texture : Handle<Image>  = asset_server.load(*path);
-        CardAsset { texture, card_type: card_type.clone() }
-    })
-    .collect();
-
+    let all_textures: Vec<CardAsset> = card_files
+        .iter()
+        .map(|(path, card_type)| {
+            let texture: Handle<Image> = asset_server.load(*path);
+            CardAsset {
+                texture,
+                card_type: card_type.clone(),
+            }
+        })
+        .collect();
 
     // Build the animation graph
     let mut graph = AnimationGraph::new();
     let animations = graph
         .add_clips(
-            [
-                GltfAssetLabel::Animation(0).from_asset("models/low_poly_naruto/scene.gltf#Scene0"),
-            ]
-            .into_iter()
-            .map(|path| asset_server.load(path)),
+            [GltfAssetLabel::Animation(0).from_asset("models/low_poly_naruto/scene.gltf#Scene0")]
+                .into_iter()
+                .map(|path| asset_server.load(path)),
             1.0,
             graph.root,
         )
@@ -123,8 +133,6 @@ fn setup(
         graph: graph.clone(),
     });
 
-
-    
     //Circular Plane
     commands.spawn(PbrBundle {
         mesh: meshes.add(Circle::new(4.0)),
@@ -161,9 +169,9 @@ fn setup(
         ..default()
     });
 
-      // UI setup
+    // UI setup
     //   commands.spawn(Camera2dBundle::default());
-      commands.spawn((
+    commands.spawn((
         TextBundle::from_section(
             // Accepts a `String` or any type that converts into a `String`, such as `&str`
             "hello\nbevy!",
@@ -183,71 +191,72 @@ fn setup(
         }),
         components::ui_components::EnemyCount,
     ));
-
 }
 
-
-
-fn setup_fps_counter(mut commands: Commands){
-    let root = commands.spawn((
-        ui_components::FpsRoot,
-        NodeBundle{
-            background_color: BackgroundColor(Color::BLACK.with_alpha(0.5)),
-            z_index: ZIndex::Global(i32::MAX),
-            style: Style{
-                position_type: PositionType::Absolute,
-                left: Val::Percent(1.0),
-                top: Val::Percent(1.0),
-                bottom: Val::Auto,
-                padding: UiRect::all(Val::Px(4.0)),
-                flex_wrap: FlexWrap::Wrap,
-                max_width: Val::Px(150.0),
-                max_height: Val::Px(200.0),
+fn setup_fps_counter(mut commands: Commands) {
+    let root = commands
+        .spawn((
+            ui_components::FpsRoot,
+            NodeBundle {
+                background_color: BackgroundColor(Color::BLACK.with_alpha(0.5)),
+                z_index: ZIndex::Global(i32::MAX),
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    left: Val::Percent(1.0),
+                    top: Val::Percent(1.0),
+                    bottom: Val::Auto,
+                    padding: UiRect::all(Val::Px(4.0)),
+                    flex_wrap: FlexWrap::Wrap,
+                    max_width: Val::Px(150.0),
+                    max_height: Val::Px(200.0),
+                    ..Default::default()
+                },
                 ..Default::default()
             },
-            ..Default::default()
-        }     
-    )).id();
+        ))
+        .id();
 
-    let text_fps = commands.spawn((
-        ui_components::FpsText,
-        TextBundle {
-            text: Text::from_sections([
-                TextSection {
-                    value: "FPS: ".into(),
-                    style: TextStyle {
-                        font_size: 16.0,
-                        color: Color::WHITE,
-                        ..default()
-                    }
-                },
-                TextSection {
-                    value: " N/A".into(),
-                    style: TextStyle {
-                        font_size: 16.0,
-                        color: Color::WHITE,
-                        ..default()
-                    }
-                },
-                TextSection {
-                    value: " Draw Calls:".into(),
-                    style: TextStyle {
-                        font_size: 16.0,
-                        color: Color::WHITE,
-                        ..default()
-                    }
-                },
-                TextSection {
-                    value: " N/A".into(),
-                    style: TextStyle {
-                        font_size: 16.0,
-                        color: Color::WHITE,
-                        ..default()
-                    }
-                },
-            ]),
-            ..Default::default()
-        },
-    )).id();
+    let text_fps = commands
+        .spawn((
+            ui_components::FpsText,
+            TextBundle {
+                text: Text::from_sections([
+                    TextSection {
+                        value: "FPS: ".into(),
+                        style: TextStyle {
+                            font_size: 16.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    },
+                    TextSection {
+                        value: " N/A".into(),
+                        style: TextStyle {
+                            font_size: 16.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    },
+                    TextSection {
+                        value: " Draw Calls:".into(),
+                        style: TextStyle {
+                            font_size: 16.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    },
+                    TextSection {
+                        value: " N/A".into(),
+                        style: TextStyle {
+                            font_size: 16.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    },
+                ]),
+                ..Default::default()
+            },
+        ))
+        .id();
     commands.entity(root).push_children(&[text_fps]);
 }

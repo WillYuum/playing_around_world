@@ -12,7 +12,6 @@ pub fn handle_play_enemy_animation_on_spawn(
     for (entity, mut player) in &mut enemies {
         let mut transitions = AnimationTransitions::new();
 
-        
         transitions
             .play(&mut player, animations.animations[0], Duration::ZERO)
             .repeat();
@@ -22,5 +21,4 @@ pub fn handle_play_enemy_animation_on_spawn(
             .insert(animations.graph.clone())
             .insert(transitions);
     }
-
 }

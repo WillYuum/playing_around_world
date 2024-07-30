@@ -20,8 +20,8 @@ impl Default for Position {
     }
 }
 
-impl Position{
-    pub fn convert_to_vec3(&self) -> Vec3{
+impl Position {
+    pub fn convert_to_vec3(&self) -> Vec3 {
         return Vec3::new(self.x, self.y, self.z);
     }
 }

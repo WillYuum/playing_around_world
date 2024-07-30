@@ -15,7 +15,6 @@ pub fn enemy_movement_system(
         pos.x = transform.translation.x;
         pos.z = transform.translation.z;
 
-
         let pew = Vec3::new(pos.x, 0.0, pos.z);
         transform.rotation = rotation_towards_target(pew, Vec3::ZERO);
     }

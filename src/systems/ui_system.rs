@@ -1,13 +1,10 @@
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 
-use crate::resources::game_state::GameState;
 use crate::components::ui_components::{self, EnemyCount};
+use crate::resources::game_state::GameState;
 
-pub fn ui_system(
-    mut query: Query<&mut Text, With<EnemyCount>>,
-    game_state: Res<GameState>,
-) {
+pub fn ui_system(mut query: Query<&mut Text, With<EnemyCount>>, game_state: Res<GameState>) {
     for mut text in query.iter_mut() {
         text.sections[0].value = format!("Narutos: {}", game_state.enemy_count);
     }
@@ -35,18 +32,10 @@ pub fn fps_text_update_system(
                 Color::srgb(0.0, 1.0, 0.0)
             } else if value >= 60.0 {
                 // Between 60-120 FPS, gradually transition from yellow to green
-                Color::srgb(
-                    (1.0 - (value - 60.0) / (120.0 - 60.0)) as f32,
-                    1.0,
-                    0.0,
-                )
+                Color::srgb((1.0 - (value - 60.0) / (120.0 - 60.0)) as f32, 1.0, 0.0)
             } else if value >= 30.0 {
                 // Between 30-60 FPS, gradually transition from red to yellow
-                Color::srgb(
-                    1.0,
-                    ((value - 30.0) / (60.0 - 30.0)) as f32,
-                    0.0,
-                )
+                Color::srgb(1.0, ((value - 30.0) / (60.0 - 30.0)) as f32, 0.0)
             } else {
                 // Below 30 FPS, use red color
                 Color::srgb(1.0, 0.0, 0.0)

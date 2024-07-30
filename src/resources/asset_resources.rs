@@ -5,8 +5,6 @@ pub struct NarutoResource {
     pub model: Handle<Scene>,
 }
 
-
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum CardType {
     Ace,
@@ -15,11 +13,8 @@ pub enum CardType {
     Jack,
 }
 
-
-
 #[derive(Resource)]
 pub struct CardAsset {
     pub card_type: CardType,
     pub texture: Handle<Image>,
 }
-

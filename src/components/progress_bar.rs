@@ -1,14 +1,22 @@
 // src/progress_bar.rs
 
-use bevy::math::VectorSpace;
 use bevy::prelude::*;
-use bevy::asset::{load_internal_asset, prelude::Assets, Asset, Handle};
+use bevy::asset::{Assets, Handle};
 use bevy::color::{Color, LinearRgba};
-use bevy::ecs::prelude::{Bundle, Component, Query, ResMut};
+use bevy::ecs::prelude::{Component, Query, ResMut};
 use bevy::reflect::TypePath;
 use bevy::render::render_resource::{AsBindGroup, Shader};
 use bevy::ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial, UiMaterialPlugin};
 use bevy::utils::default;
+
+
+/*
+    This component should handle create data required to control a progress bar and connect with the shader code for progress bar.
+
+    Notes:
+    Had to use LinearRGB since I use Color the compiler will complain about a trait not satisfied with AsBindGroup.
+*/
+
 
 // Define a unique handle for the shader
 pub const PROGRESS_BAR_HANDLE: Handle<Shader> = Handle::weak_from_u128(8714649747086695632918559878778085427);
@@ -17,24 +25,16 @@ pub const PROGRESS_BAR_HANDLE: Handle<Shader> = Handle::weak_from_u128(871464974
 #[derive(Component, Clone)]
 pub struct ProgressBar {
     progress: f32, // A value between 0.0 and 1.0 representing the progress
-    pub sections: Vec<(u32, LinearRgba)>, // Different sections of the progress bar
-    pub empty_color: LinearRgba, // Color of the empty space
+    fill_color: LinearRgba,
+    empty_color: LinearRgba,
 }
 
 impl ProgressBar {
-    pub fn new(sections: Vec<(u32, LinearRgba)>) -> Self {
+    pub fn new(fill_color: LinearRgba, empty_color: LinearRgba) -> Self {
         Self {
             progress: 0.0,
-            sections,
-            empty_color: LinearRgba::ZERO,
-        }
-    }
-
-    pub fn single(color: LinearRgba) -> Self {
-        Self {
-            progress: 0.0,
-            sections: vec![(1, color)],
-            empty_color: LinearRgba::NONE,
+            fill_color,
+            empty_color,
         }
     }
 
@@ -48,27 +48,12 @@ impl ProgressBar {
     }
 
     pub fn increase_progress(&mut self, amount: f32) -> &mut Self {
-        self.progress += amount;
-        self.progress = self.progress.clamp(0.0, 1.0);
+        self.progress = (self.progress + amount).clamp(0.0, 1.0);
         self
     }
 
     pub fn reset(&mut self) -> &mut Self {
         self.progress = 0.0;
-        self
-    }
-
-    pub fn is_finished(&self) -> bool {
-        self.progress >= 1.0
-    }
-
-    pub fn clear_sections(&mut self) -> &mut Self {
-        self.sections.clear();
-        self
-    }
-
-    pub fn add_section(&mut self, amount: u32, color: LinearRgba) -> &mut Self {
-        self.sections.push((amount, color));
         self
     }
 }
@@ -77,16 +62,16 @@ impl Default for ProgressBar {
     fn default() -> Self {
         Self {
             progress: 0.0,
-            sections: vec![],
-            empty_color: LinearRgba::NONE,
+            fill_color: LinearRgba::rgb(1.0, 0.0, 0.0), // Default fill color red
+            empty_color: LinearRgba::rgb(0.0, 0.0, 0.0), // Default empty color black
         }
     }
 }
 
 #[derive(Bundle)]
 pub struct ProgressBarBundle {
-    progressbar: ProgressBar,
-    material_node_bundle: MaterialNodeBundle<ProgressBarMaterial>,
+    pub progressbar: ProgressBar,
+    pub material_node_bundle: MaterialNodeBundle<ProgressBarMaterial>,
 }
 
 impl ProgressBarBundle {
@@ -112,15 +97,8 @@ pub struct ProgressBarMaterial {
     empty_color: LinearRgba,
     #[uniform(1)]
     progress: f32,
-    /// The color of each section
-    #[storage(2, read_only)]
-    sections_color: Vec<LinearRgba>,
-    #[storage(3, read_only)]
-    sections_start_percentage: Vec<f32>,
-    /// the length of the `sections_color` / `sections_start_percentage` vec.
-    /// needs to be set for the shader
-    #[uniform(4)]
-    sections_count: u32,
+    #[uniform(2)]
+    fill_color: LinearRgba,
 }
 
 impl Default for ProgressBarMaterial {
@@ -128,9 +106,7 @@ impl Default for ProgressBarMaterial {
         Self {
             empty_color: LinearRgba::rgb(0.0, 0.0, 0.0),
             progress: 0.0,
-            sections_color: vec![],
-            sections_start_percentage: vec![],
-            sections_count: 0,
+            fill_color: LinearRgba::rgb(1.0, 0.0, 0.0),
         }
     }
 }
@@ -139,22 +115,13 @@ impl ProgressBarMaterial {
     pub fn update(&mut self, bar: &ProgressBar) {
         self.empty_color = bar.empty_color;
         self.progress = bar.progress;
-        self.sections_color.clear();
-        self.sections_start_percentage.clear();
-
-        let total_amount: u32 = bar.sections.iter().map(|(amount, _)| amount).sum();
-        for (amount, color) in &bar.sections {
-            self.sections_start_percentage
-                .push(*amount as f32 / total_amount as f32);
-            self.sections_color.push(*color);
-        }
-        self.sections_count = bar.sections.len() as u32;
+        self.fill_color = bar.fill_color;
     }
 }
 
 impl UiMaterial for ProgressBarMaterial {
     fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
-        PROGRESS_BAR_HANDLE.into()
+        "shaders/progress_bar.wgsl".into()
     }
 }
 

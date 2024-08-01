@@ -6,3 +6,4 @@ pub mod movement;
 pub mod spawning;
 pub mod ui_system;
 pub mod utils;
+pub mod progress_bar;

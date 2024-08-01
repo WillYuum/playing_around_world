@@ -1,4 +1,10 @@
+use std::process::Command;
+use std::time::Duration;
+
+use bevy::a11y::accesskit::Size;
+use bevy::asset::load_internal_asset;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::render::render_resource::AsBindGroup;
 use bevy::{
     animation::{animate_targets, RepeatAnimation},
     asset::AssetMetaCheck,
@@ -6,6 +12,7 @@ use bevy::{
 };
 use components::ui_components;
 use resources::{animations::EnemyAnimations, asset_resources::CardAsset, game_state::GameState};
+use systems::progress_bar::{self, ProgressBar, ProgressBarBundle, ProgressBarMaterial};
 
 pub mod components;
 pub mod resources;
@@ -49,6 +56,7 @@ fn main() {
         .insert_resource(game_state)
         .insert_resource(config)
         .insert_resource(camera_state)
+        .add_systems(Startup, setup_progress_bar)
         .add_systems(Startup, setup)
         .add_systems(Startup, setup_fps_counter)
         .add_systems(Update, (rotate_camera, zoom_camera))
@@ -259,4 +267,63 @@ fn setup_fps_counter(mut commands: Commands) {
         ))
         .id();
     commands.entity(root).push_children(&[text_fps]);
+}
+
+#[derive(Resource)]
+pub struct ShaderHandleResource(Handle<Shader>);
+
+fn setup_progress_bar(mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    // mut materials: ResMut<Assets<ProgressBarMaterial>>
+){
+    asset_server.watching_for_changes();
+
+    let shader_handle = asset_server.load("shaders/progress_bar.wgsl");
+
+        // Store the shader handle globally (if necessary)
+    commands.insert_resource(ShaderHandleResource(shader_handle.clone()));
+    
+
+    // let mut progress_bar = ProgressBar::new(vec![
+    //     (5, LinearRgba::RED.into()),
+    //     (3, LinearRgba::GREEN.into()),
+    //     (2, LinearRgba::BLUE.into()),
+    // ]);
+
+    // commands.spawn(ProgressBarBundle::new(progress_bar, &mut materials));
+
+    // commands.spawn(OrthographicCameraBundle::new_2d());
+
+    commands
+    .spawn(NodeBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            display: Display::Grid,
+            padding: UiRect::all(Val::Px(36.0)),
+            row_gap: Val::Px(12.0),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            ..default()
+        },
+        ..default()
+    }).with_children(|wrapper| {
+        for (index, bar) in [
+            ProgressBar::new(vec![
+                (200, LinearRgba::RED.into()),
+                (400, LinearRgba::BLUE.into()),
+            ])
+            .set_progress(1.0)
+            .clone(),
+            ProgressBar::new(vec![(200, LinearRgba::RED.into())])
+                .set_progress(1.0)
+                .clone(),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+
+        }
+    });
+
+
 }

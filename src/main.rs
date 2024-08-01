@@ -1,9 +1,13 @@
+use bevy::a11y::accesskit::Size;
+use bevy::asset::load_internal_asset;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::render::render_resource::AsBindGroup;
 use bevy::{
     animation::{animate_targets, RepeatAnimation},
     asset::AssetMetaCheck,
     prelude::*,
 };
+use components::progress_bar::ProgressBarMaterial;
 use components::ui_components;
 use resources::{animations::EnemyAnimations, asset_resources::CardAsset, game_state::GameState};
 
@@ -27,6 +31,8 @@ fn main() {
     let game_state = resources::game_state::GameState {
         enemy_count: 0,
         cooldown_timer: Timer::from_seconds(10.5, TimerMode::Repeating),
+        mana_max: 10.0,
+        curr_mana: 0.0,
     };
     let config = resources::config::Config {
         enemy_spawn_rate: 0.1,
@@ -46,9 +52,11 @@ fn main() {
             meta_check: AssetMetaCheck::Never,
             ..Default::default()
         }))
+        .add_plugins(UiMaterialPlugin::<ProgressBarMaterial>::default()) // Register the custom material
         .insert_resource(game_state)
         .insert_resource(config)
         .insert_resource(camera_state)
+        .add_systems(Startup, systems::mana_system::setup_mana_progress_bar)
         .add_systems(Startup, setup)
         .add_systems(Startup, setup_fps_counter)
         .add_systems(Update, (rotate_camera, zoom_camera))
@@ -58,6 +66,7 @@ fn main() {
         .add_systems(Update, handle_play_enemy_animation_on_spawn)
         .add_systems(Update, ui_system)
         .add_systems(Update, (fps_counter_showhide, fps_text_update_system))
+        .add_systems(Update, (systems::mana_system::increase_mana_as_time_pass, systems::mana_system::update_mana_progress))
         .add_systems(Update, systems::debug::draw_axes);
 
     built_app.add_plugins(FrameTimeDiagnosticsPlugin::default());
@@ -260,3 +269,4 @@ fn setup_fps_counter(mut commands: Commands) {
         .id();
     commands.entity(root).push_children(&[text_fps]);
 }
+

@@ -66,7 +66,13 @@ fn main() {
         .add_systems(Update, handle_play_enemy_animation_on_spawn)
         .add_systems(Update, ui_system)
         .add_systems(Update, (fps_counter_showhide, fps_text_update_system))
-        .add_systems(Update, (systems::mana_system::increase_mana_as_time_pass, systems::mana_system::update_mana_progress))
+        .add_systems(
+            Update,
+            (
+                systems::mana_system::increase_mana_as_time_pass,
+                systems::mana_system::update_mana_progress,
+            ),
+        )
         .add_systems(Update, systems::debug::draw_axes);
 
     built_app.add_plugins(FrameTimeDiagnosticsPlugin::default());
@@ -269,4 +275,3 @@ fn setup_fps_counter(mut commands: Commands) {
         .id();
     commands.entity(root).push_children(&[text_fps]);
 }
-

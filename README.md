@@ -12,7 +12,12 @@ Using bevy game engine with ECS style programming to achieve this insance goal
 1. Make sure to have Rust installed to latest version.
 2. Run `cargo run`. 
 
-## Build(Web)
+## Build
+
+### Windows:
+``` ./export_windows_86_64.sh ```
+
+### Web
 
 1. Install wasm32   
 ```rustup target install wasm32-unknown-unknown```
@@ -21,4 +26,4 @@ Using bevy game engine with ECS style programming to achieve this insance goal
 ``` $ cargo install -f wasm-bindgen-cli```
 
 3. Run web build shell script   
-``` .\web_build.sh ```
+``` ./export_web_build.sh ```

@@ -1,7 +1,7 @@
 use crate::components::animation_player::CustomAnimator;
 use crate::components::enemy::{Enemy, Position};
 use crate::resources::animations::EnemyAnimations;
-use crate::resources::asset_resources::NarutoResource;
+use crate::resources::asset_resources::{FoxResource, NarutoResource};
 use crate::resources::{config::Config, game_state::GameState};
 use bevy::prelude::*;
 use bevy::render::primitives::Aabb;
@@ -16,7 +16,7 @@ pub fn enemy_spawning_system(
     mut game_state: ResMut<GameState>,
     mut timer: Local<Timer>,
     naruto_resource: Res<NarutoResource>,
-    enemy_animations: Res<EnemyAnimations>,
+    fox_resource: Res<FoxResource>,
 ) {
     timer.tick(time.delta());
     if timer.finished() {
@@ -55,12 +55,12 @@ pub fn enemy_spawning_system(
                 let enemy_position = spawn_point + enemy_offset;
 
                 let enemy_transform = Transform::from_translation(enemy_position)
-                    .with_scale(Vec3::splat(0.4))
+                    .with_scale(Vec3::splat(0.01))
                     .with_rotation(Quat::IDENTITY);
 
                 commands.spawn((
                     SceneBundle {
-                        scene: naruto_resource.model.clone(),
+                        scene: fox_resource.model.clone(),
                         transform: enemy_transform,
                         ..Default::default()
                     },

@@ -92,11 +92,35 @@ fn setup(
         CardAsset,
         CardType,
         NarutoResource,
+        FoxResource
     };
+
 
     let naruto_model_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
     commands.insert_resource(NarutoResource {
         model: naruto_model_handle,
+    });
+
+    let animation_clips = [
+        asset_server.load(GltfAssetLabel::Animation(2).from_asset("models/Fox.glb")),
+        asset_server.load(GltfAssetLabel::Animation(1).from_asset("models/Fox.glb")),
+        asset_server.load(GltfAssetLabel::Animation(0).from_asset("models/Fox.glb")),
+    ];
+
+    let mut animation_graph = AnimationGraph::new();
+    let node_indices = animation_graph
+        .add_clips(animation_clips.iter().cloned(), 1.0, animation_graph.root)
+        .collect();
+
+
+    commands.insert_resource(FoxResource{
+        model:   asset_server.load(GltfAssetLabel::Scene(0).from_asset("models/Fox.glb")),
+        animations: {
+            resources::animations::ModelAnimations {
+                node_indices: node_indices,
+                graph: graphs.add(animation_graph),
+            }
+        }
     });
 
     let card_files = [

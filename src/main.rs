@@ -1,15 +1,10 @@
-use bevy::a11y::accesskit::Size;
-use bevy::asset::load_internal_asset;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
-use bevy::render::render_resource::AsBindGroup;
 use bevy::{
-    animation::{animate_targets, RepeatAnimation},
     asset::AssetMetaCheck,
     prelude::*,
 };
 use components::progress_bar::ProgressBarMaterial;
 use components::ui_components;
-use resources::{animations::EnemyAnimations, asset_resources::CardAsset, game_state::GameState};
 
 pub mod components;
 pub mod resources;
@@ -91,12 +86,29 @@ fn setup(
         // Cards2DResources,
         CardAsset,
         CardType,
-        NarutoResource,
+        FoxResource
     };
 
-    let naruto_model_handle = asset_server.load("models/low_poly_naruto/scene.gltf#Scene0");
-    commands.insert_resource(NarutoResource {
-        model: naruto_model_handle,
+    let animation_clips = [
+        asset_server.load(GltfAssetLabel::Animation(2).from_asset("models/Fox.glb")),
+        asset_server.load(GltfAssetLabel::Animation(1).from_asset("models/Fox.glb")),
+        asset_server.load(GltfAssetLabel::Animation(0).from_asset("models/Fox.glb")),
+    ];
+
+    let mut animation_graph = AnimationGraph::new();
+    let node_indices = animation_graph
+        .add_clips(animation_clips.iter().cloned(), 1.0, animation_graph.root)
+        .collect();
+
+
+    commands.insert_resource(FoxResource{
+        model:   asset_server.load(GltfAssetLabel::Scene(0).from_asset("models/Fox.glb")),
+        animations: {
+            resources::animations::ModelAnimations {
+                node_indices: node_indices,
+                graph: graphs.add(animation_graph),
+            }
+        }
     });
 
     let card_files = [
@@ -129,24 +141,6 @@ fn setup(
         })
         .collect();
 
-    // Build the animation graph
-    let mut graph = AnimationGraph::new();
-    let animations = graph
-        .add_clips(
-            [GltfAssetLabel::Animation(0).from_asset("models/low_poly_naruto/scene.gltf#Scene0")]
-                .into_iter()
-                .map(|path| asset_server.load(path)),
-            1.0,
-            graph.root,
-        )
-        .collect();
-
-    // Insert a resource with the current scene information
-    let graph = graphs.add(graph);
-    commands.insert_resource(EnemyAnimations {
-        animations,
-        graph: graph.clone(),
-    });
 
     //Circular Plane
     commands.spawn(PbrBundle {

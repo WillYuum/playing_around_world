@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Resource)]
-pub struct EnemyAnimations {
-    pub animations: Vec<AnimationNodeIndex>,
-    #[allow(dead_code)]
+pub struct ModelAnimations {
+    pub node_indices: Vec<AnimationNodeIndex>,
     pub graph: Handle<AnimationGraph>,
 }

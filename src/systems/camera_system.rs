@@ -1,9 +1,5 @@
 use bevy::{
-    input::{
-        keyboard::Key,
-        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    },
-    math::VectorSpace,
+    input::mouse::{ MouseMotion, MouseWheel},
     prelude::*,
 };
 
@@ -26,7 +22,7 @@ pub fn rotate_camera(
         camera_state.rotating = false;
     }
 
-    if (camera_state.rotating) {
+    if camera_state.rotating {
         println!("Left Mouse Being Pressed.");
         for mouse_motion in evr_motion.read() {
             for mut transform in query.iter_mut() {

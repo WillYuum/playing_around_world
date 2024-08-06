@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 
+use super::animations::ModelAnimations;
+
 #[derive(Resource)]
-pub struct NarutoResource {
+pub struct FoxResource{
     pub model: Handle<Scene>,
+    pub animations: ModelAnimations,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

@@ -2,11 +2,11 @@
 
 use bevy::prelude::*;
 use bevy::asset::{Assets, Handle};
-use bevy::color::{Color, LinearRgba};
+use bevy::color::LinearRgba;
 use bevy::ecs::prelude::{Component, Query, ResMut};
 use bevy::reflect::TypePath;
 use bevy::render::render_resource::{AsBindGroup, Shader};
-use bevy::ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial, UiMaterialPlugin};
+use bevy::ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial};
 use bevy::utils::default;
 
 

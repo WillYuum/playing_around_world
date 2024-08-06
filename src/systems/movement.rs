@@ -1,5 +1,5 @@
 use crate::components::enemy;
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 
 use super::utils::rotation_towards_target;
 

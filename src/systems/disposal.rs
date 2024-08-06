@@ -1,6 +1,5 @@
 use crate::components::enemy::{Enemy, Position};
 use crate::resources::game_state::GameState;
-use bevy::math::VectorSpace;
 use bevy::prelude::*;
 
 pub fn enemy_disposal_system(
